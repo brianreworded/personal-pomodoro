@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Cookies from 'js-cookie'
 import Confetti from 'react-confetti'
 import { useTheme } from '@/components/ui/ThemeProvider'
 import { cookieService } from '@/lib/cookieService'

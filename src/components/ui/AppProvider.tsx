@@ -130,10 +130,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   
   // Save tasks to cookies whenever they change
   useEffect(() => {
-    if (tasks.length > 0 || workoutHistory.length > 0) {
+    if (tasks.length > 0 || workoutHistory?.length > 0) {
       cookieService.saveTasks(tasks)
     }
-  }, [tasks])
+  }, [tasks, workoutHistory?.length])
   
   // Save workout history to cookies whenever it changes
   useEffect(() => {

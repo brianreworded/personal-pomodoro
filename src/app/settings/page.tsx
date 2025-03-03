@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { FaArrowLeft, FaCheck } from 'react-icons/fa'
 import { useTheme } from '@/components/ui/ThemeProvider'
@@ -9,7 +9,7 @@ import { ColorTheme } from '@/lib/types'
 import { cookieService } from '@/lib/cookieService'
 
 // Import workout exercise data
-import { workoutExercises, WORKOUT_TYPES } from '@/lib/workoutData'
+import { workoutExercises } from '@/lib/workoutData'
 
 export default function SettingsPage() {
   const { settings, updateSettings, colorThemeClasses } = useTheme()
@@ -32,7 +32,7 @@ export default function SettingsPage() {
   })
   
   // Function to update stats from current app state
-  const updateStats = () => {
+  const updateStats = useCallback(() => {
     // Calculate task stats from the centralized state
     const completedTasks = tasks.filter((task) => task.completed)
     const todayTasks = completedTasks.filter((task) => {
@@ -66,12 +66,12 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Failed to load pomodoro count', error)
     }
-  }
+  }, [tasks, workoutHistory])
 
   // Update stats whenever tasks or workout history changes
   useEffect(() => {
     updateStats()
-  }, [tasks, workoutHistory])
+  }, [updateStats])
   
   const colorOptions: { value: ColorTheme; label: string; bgClass: string }[] = [
     { value: 'blue', label: 'Blue', bgClass: 'bg-blue-500' },
