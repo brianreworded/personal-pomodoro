@@ -1,4 +1,4 @@
-NextJS/ShadcnUI Pomodoro Fitness App
+# Personal Pomodoro App
 Core Concept
 A productivity app that combines the Pomodoro technique with active workout breaks. Instead of traditional passive breaks, users complete short workouts between work sessions, promoting both productivity and physical wellbeing.
 Core Functionality
