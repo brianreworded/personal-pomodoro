@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import TimerPanel from '@/components/timer/TimerPanel'
 import TaskPanel from '@/components/tasks/TaskPanel'
 import WorkoutPanel from '@/components/workout/WorkoutPanel'

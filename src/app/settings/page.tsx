@@ -30,18 +30,21 @@ export default function SettingsPage() {
   useEffect(() => {
     try {
       const tasks = cookieService.getTasks()
-      const completedTasks = tasks.filter(task => task.completed)
-      const todayStart = new Date().setHours(0, 0, 0, 0)
-      const todayTasks = completedTasks.filter(task => {
+      const completedTasks = tasks.filter((task) => task.completed)
+      const todayTasks = completedTasks.filter((task) => {
         // This is a simplification as we'd need proper date tracking in tasks
-        return true // placeholder for actual date comparison
+        if (task){
+          return true; // placeholder for actual date comparison
+        } else {
+          return false;
+        }
       })
       
       setTaskStats({
         total: completedTasks.length,
         today: todayTasks.length
       })
-    } catch (e) {
+    } catch {
       console.error('Failed to load tasks')
     }
     
@@ -53,7 +56,7 @@ export default function SettingsPage() {
         yoga: workouts.filter(w => w.type === 'yoga').length,
         calisthenics: workouts.filter(w => w.type === 'calisthenics').length
       })
-    } catch (e) {
+    } catch {
       console.error('Failed to load workout history')
     }
     
@@ -62,7 +65,7 @@ export default function SettingsPage() {
       setPomodoroStats({
         total: pomodoroCount
       })
-    } catch (e) {
+    } catch {
       console.error('Failed to load pomodoro count')
     }
   }, [])

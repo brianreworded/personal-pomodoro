@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'
 import { FaEllipsisH, FaEye, FaEyeSlash, FaTrash, FaPlus } from 'react-icons/fa'
 import Confetti from 'react-confetti'
 import { useTheme } from '@/components/ui/ThemeProvider'
@@ -79,7 +79,7 @@ const TaskPanel = () => {
     setTasks(updatedTasks)
   }
   
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
     
     const items = Array.from(tasks)

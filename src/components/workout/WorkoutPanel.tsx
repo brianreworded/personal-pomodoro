@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Cookies from 'js-cookie'
 import Confetti from 'react-confetti'
 
@@ -74,7 +74,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
     if (savedHistory) {
       try {
         setWorkoutHistory(JSON.parse(savedHistory))
-      } catch (e) {
+      } catch {
         console.error('Failed to parse workout history from cookies')
       }
     }
@@ -83,7 +83,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
     if (savedPreferences) {
       try {
         setUserPreferences(JSON.parse(savedPreferences))
-      } catch (e) {
+      } catch {
         console.error('Failed to parse workout preferences from cookies')
       }
     }
@@ -99,14 +99,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
     Cookies.set('workoutPreferences', JSON.stringify(userPreferences), { expires: 365 })
   }, [userPreferences])
   
-  // Generate a new workout when the timer completes
-  useEffect(() => {
-    if (isActive && (!currentWorkout || currentWorkout.completed)) {
-      generateWorkout()
-    }
-  }, [isActive, currentWorkout])
-  
-  const generateWorkout = () => {
+  const generateWorkout = useCallback(() => {
     // Randomly select workout type
     const workoutTypes = Object.values(WORKOUT_TYPES)
     const randomType = workoutTypes[Math.floor(Math.random() * workoutTypes.length)]
@@ -176,7 +169,14 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
     
     setCurrentWorkout(newWorkout)
     setShowFeedback(false)
-  }
+  }, [userPreferences])
+  
+  // Generate a new workout when the timer completes
+  useEffect(() => {
+    if (isActive && (!currentWorkout || currentWorkout.completed)) {
+      generateWorkout()
+    }
+  }, [isActive, currentWorkout, generateWorkout])
   
   const completeWorkout = () => {
     if (!currentWorkout) return
@@ -318,7 +318,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
       {currentWorkout && currentWorkout.completed && !showFeedback && (
         <div className="text-center py-8">
           <p className="text-green-500 font-semibold mb-4">
-            Great job! You've completed your active break.
+            Great job! You have completed your active break.
           </p>
           <button
             onClick={() => onWorkoutComplete()}

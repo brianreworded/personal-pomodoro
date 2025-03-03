@@ -17,7 +17,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
   const { colorThemeClasses } = useTheme()
   
   // We'll handle the sound later when we have a proper sound file
-  //const [playAlarm] = useSound('/sounds/alarm.mp3')
+  const [playAlarm] = useSound('/sounds/alarm.mp3')
   
   useEffect(() => {
     if (isActive && timeLeft > 0) {
@@ -26,7 +26,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
         setProgress((timeLeft - 1) / duration * 100)
       }, 1000)
     } else if (isActive && timeLeft === 0) {
-      //playAlarm()
+      playAlarm()
       onTimerComplete()
       setIsActive(false)
     }
@@ -34,7 +34,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [isActive, timeLeft, duration, onTimerComplete])
+  }, [isActive, timeLeft, duration, onTimerComplete, playAlarm])
   
   const toggleTimer = () => {
     setIsActive(!isActive)
