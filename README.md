@@ -134,7 +134,7 @@ Responsive design for mobile and desktop use
 Accessibility considerations (screen reader compatible, keyboard navigation)
 Offline functionality (PWA capabilities)
 
-Cache Implementation
+### Cache Implementation
 
 Store number of work tasks completed
 Store number of workout breaks completed by category
