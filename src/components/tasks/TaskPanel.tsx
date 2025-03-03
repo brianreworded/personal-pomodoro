@@ -1,31 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'
 import { FaEllipsisH, FaEye, FaEyeSlash, FaTrash, FaPlus } from 'react-icons/fa'
 import Confetti from 'react-confetti'
 import { useTheme } from '@/components/ui/ThemeProvider'
-import { cookieService } from '@/lib/cookieService'
+import { useAppState } from '@/components/ui/AppProvider'
 import { Task } from '@/lib/types'
 
 const TaskPanel = () => {
-  const [tasks, setTasks] = useState<Task[]>([])
   const [newTaskText, setNewTaskText] = useState('')
   const [showCompleted, setShowCompleted] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const { colorThemeClasses, settings } = useTheme()
-  
-  // Load tasks from cookies on initial render
-  useEffect(() => {
-    const savedTasks = cookieService.getTasks()
-    setTasks(savedTasks)
-  }, [])
-  
-  // Save tasks to cookies whenever they change
-  useEffect(() => {
-    cookieService.saveTasks(tasks)
-  }, [tasks])
+  const { tasks, updateTasks } = useAppState()
   
   const addTask = () => {
     if (newTaskText.trim() === '') return
@@ -37,7 +26,7 @@ const TaskPanel = () => {
       createdAt: Date.now(),
     }
     
-    setTasks([...tasks, newTask])
+    updateTasks([...tasks, newTask])
     setNewTaskText('')
   }
   
@@ -64,21 +53,22 @@ const TaskPanel = () => {
       return task
     })
     
-    setTasks(updatedTasks)
+    updateTasks(updatedTasks)
   }
   
   const updateTaskText = (id: string, newText: string) => {
     const updatedTasks = tasks.map(task => 
       task.id === id ? { ...task, text: newText } : task
     )
-    setTasks(updatedTasks)
+    updateTasks(updatedTasks)
   }
   
   const deleteCompletedTasks = () => {
     const updatedTasks = tasks.filter(task => !task.completed)
-    setTasks(updatedTasks)
+    updateTasks(updatedTasks)
   }
   
+  // Make sure drag and drop reordering works for tasks
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
     
@@ -86,12 +76,20 @@ const TaskPanel = () => {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
     
-    setTasks(items)
+    // Update the tasks with the new order
+    updateTasks(items)
   }
   
+  // Sort tasks to put completed tasks at the bottom
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (a.completed && !b.completed) return 1;
+    if (!a.completed && b.completed) return -1;
+    return 0;
+  });
+  
   const filteredTasks = showCompleted 
-    ? tasks 
-    : tasks.filter(task => !task.completed)
+    ? sortedTasks 
+    : sortedTasks.filter(task => !task.completed)
   
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 relative">

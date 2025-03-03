@@ -7,13 +7,14 @@ export interface Task {
 }
 
 export interface Workout {
-  id: string
+  id?: string
   type: 'stretches' | 'yoga' | 'calisthenics'
   exercise: string
   reps: number
   sets: number
+  duration?: number // Duration in seconds (for timed exercises like yoga)
   completed: boolean
-  createdAt: number
+  createdAt?: number
   completedAt?: number
   feedback?: 'easy' | 'just-right' | 'hard'
 }
@@ -44,4 +45,17 @@ export interface Stats {
     calisthenics: number
   }
   pomodoroSessionsCompleted: number
+}
+
+export interface TimerState {
+  timeLeft: number
+  duration: number
+  isActive: boolean
+  isCompleted: boolean
+}
+
+export interface AppState {
+  timerState: TimerState
+  currentWorkouts: Workout[]
+  isWorkoutActive: boolean
 }

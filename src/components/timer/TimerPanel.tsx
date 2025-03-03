@@ -3,15 +3,17 @@
 import { useState, useEffect, useRef } from 'react'
 import useSound from 'use-sound'
 import { useTheme } from '@/components/ui/ThemeProvider'
+import { useAppState } from '@/components/ui/AppProvider'
 
 interface TimerPanelProps {
   onTimerComplete: () => void
 }
 
 const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
-  const [duration, setDuration] = useState(25 * 60) // 25 minutes in seconds
-  const [timeLeft, setTimeLeft] = useState(duration)
-  const [isActive, setIsActive] = useState(false)
+  const { appState, updateTimerState, setTimerCompleted } = useAppState()
+  const { timerState } = appState
+  const { timeLeft, duration, isActive } = timerState
+  
   const [progress, setProgress] = useState(100)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const { colorThemeClasses } = useTheme()
@@ -19,39 +21,49 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
   // We'll handle the sound later when we have a proper sound file
   const [playAlarm] = useSound('/sounds/alarm.mp3')
   
+  // Initialize progress
+  useEffect(() => {
+    setProgress((timeLeft / duration) * 100)
+  }, [timeLeft, duration])
+  
   useEffect(() => {
     if (isActive && timeLeft > 0) {
       timerRef.current = setTimeout(() => {
-        setTimeLeft(timeLeft - 1)
+        updateTimerState({ timeLeft: timeLeft - 1 })
         setProgress((timeLeft - 1) / duration * 100)
       }, 1000)
     } else if (isActive && timeLeft === 0) {
       playAlarm()
+      setTimerCompleted(true)
       onTimerComplete()
-      setIsActive(false)
+      updateTimerState({ isActive: false })
     }
     
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [isActive, timeLeft, duration, onTimerComplete, playAlarm])
+  }, [isActive, timeLeft, duration, onTimerComplete, playAlarm, updateTimerState, setTimerCompleted])
   
   const toggleTimer = () => {
-    setIsActive(!isActive)
+    updateTimerState({ isActive: !isActive })
   }
   
   const resetTimer = () => {
-    setIsActive(false)
-    setTimeLeft(duration)
+    updateTimerState({ 
+      isActive: false,
+      timeLeft: duration
+    })
     setProgress(100)
   }
   
   const changeDuration = (minutes: number) => {
     const newDuration = minutes * 60
-    setDuration(newDuration)
-    setTimeLeft(newDuration)
+    updateTimerState({
+      duration: newDuration,
+      timeLeft: newDuration,
+      isActive: false
+    })
     setProgress(100)
-    setIsActive(false)
   }
   
   const formatTime = (seconds: number): string => {

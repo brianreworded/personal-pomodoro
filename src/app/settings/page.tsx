@@ -4,11 +4,16 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FaArrowLeft, FaCheck } from 'react-icons/fa'
 import { useTheme } from '@/components/ui/ThemeProvider'
+import { useAppState } from '@/components/ui/AppProvider'
 import { ColorTheme } from '@/lib/types'
 import { cookieService } from '@/lib/cookieService'
 
+// Import workout exercise data
+import { workoutExercises, WORKOUT_TYPES } from '@/lib/workoutData'
+
 export default function SettingsPage() {
   const { settings, updateSettings, colorThemeClasses } = useTheme()
+  const { tasks, workoutHistory } = useAppState()
   
   const [taskStats, setTaskStats] = useState({
     total: 0,
@@ -26,49 +31,47 @@ export default function SettingsPage() {
     total: 0
   })
   
-  // Load stats from cookies on initial render
-  useEffect(() => {
-    try {
-      const tasks = cookieService.getTasks()
-      const completedTasks = tasks.filter((task) => task.completed)
-      const todayTasks = completedTasks.filter((task) => {
-        // This is a simplification as we'd need proper date tracking in tasks
-        if (task){
-          return true; // placeholder for actual date comparison
-        } else {
-          return false;
-        }
-      })
-      
-      setTaskStats({
-        total: completedTasks.length,
-        today: todayTasks.length
-      })
-    } catch {
-      console.error('Failed to load tasks')
-    }
+  // Function to update stats from current app state
+  const updateStats = () => {
+    // Calculate task stats from the centralized state
+    const completedTasks = tasks.filter((task) => task.completed)
+    const todayTasks = completedTasks.filter((task) => {
+      // This is a simplification as we'd need proper date tracking in tasks
+      if (task){
+        return true; // placeholder for actual date comparison
+      } else {
+        return false;
+      }
+    })
     
-    try {
-      const workouts = cookieService.getWorkoutHistory()
-      setWorkoutStats({
-        total: workouts.length,
-        stretches: workouts.filter(w => w.type === 'stretches').length,
-        yoga: workouts.filter(w => w.type === 'yoga').length,
-        calisthenics: workouts.filter(w => w.type === 'calisthenics').length
-      })
-    } catch {
-      console.error('Failed to load workout history')
-    }
+    setTaskStats({
+      total: completedTasks.length,
+      today: todayTasks.length
+    })
     
+    // Calculate workout stats from the centralized state
+    setWorkoutStats({
+      total: workoutHistory.length,
+      stretches: workoutHistory.filter(w => w.type === 'stretches').length,
+      yoga: workoutHistory.filter(w => w.type === 'yoga').length,
+      calisthenics: workoutHistory.filter(w => w.type === 'calisthenics').length
+    })
+    
+    // Load pomodoro count (still from cookies since we're not tracking that in global state)
     try {
       const pomodoroCount = cookieService.getPomodoroCount()
       setPomodoroStats({
         total: pomodoroCount
       })
-    } catch {
-      console.error('Failed to load pomodoro count')
+    } catch (error) {
+      console.error('Failed to load pomodoro count', error)
     }
-  }, [])
+  }
+
+  // Update stats whenever tasks or workout history changes
+  useEffect(() => {
+    updateStats()
+  }, [tasks, workoutHistory])
   
   const colorOptions: { value: ColorTheme; label: string; bgClass: string }[] = [
     { value: 'blue', label: 'Blue', bgClass: 'bg-blue-500' },
@@ -152,18 +155,66 @@ export default function SettingsPage() {
             <div className="mb-4">
               <h3 className="text-sm font-medium mb-2">Recent Tasks</h3>
               <div className="max-h-32 overflow-y-auto">
-                <p className="text-gray-500 dark:text-gray-400 text-sm italic">
-                  History logs will appear here as you complete tasks and workouts.
-                </p>
+                {taskStats.total > 0 ? (
+                  <ul className="space-y-1">
+                    {tasks
+                      .filter(task => task.completed)
+                      .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))
+                      .slice(0, 5)
+                      .map((task, index) => (
+                        <li key={index} className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+                          <span className={`w-2 h-2 rounded-full mr-2 ${colorThemeClasses.progress}`}></span>
+                          <span className="font-medium">{task.text}</span>
+                          <span className="text-gray-400 ml-auto text-xs">
+                            {task.completedAt ? new Date(task.completedAt).toLocaleDateString() : ''}
+                          </span>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                    Complete tasks to see your history here.
+                  </p>
+                )}
               </div>
             </div>
             
             <div>
               <h3 className="text-sm font-medium mb-2">Recent Workouts</h3>
               <div className="max-h-32 overflow-y-auto">
-                <p className="text-gray-500 dark:text-gray-400 text-sm italic">
-                  History logs will appear here as you complete tasks and workouts.
-                </p>
+                {workoutStats.total > 0 ? (
+                  <ul className="space-y-1">
+                    {workoutHistory
+                      .slice(-5)
+                      .reverse()
+                      .map((workout, index) => (
+                        <li key={index} className="text-sm text-gray-600 dark:text-gray-300 flex items-center group relative">
+                          <span className={`w-2 h-2 rounded-full mr-2 ${
+                            workout.type === 'stretches' ? 'bg-blue-500' : 
+                            workout.type === 'yoga' ? 'bg-emerald-500' : 
+                            'bg-amber-500'
+                          }`}></span>
+                          <span className="font-medium cursor-help">{workout.exercise}</span>
+                          <div className={`ml-1 w-4 h-4 rounded-full ${colorThemeClasses.accent} bg-opacity-20 dark:bg-opacity-30 flex items-center justify-center text-xs cursor-help`}>
+                            <span className="text-xs font-bold">?</span>
+                          </div>
+                          <span className="text-gray-400 ml-1">
+                            ({workout.type.charAt(0).toUpperCase() + workout.type.slice(1)})
+                          </span>
+                          <div className="absolute left-0 bottom-full mb-2 w-64 bg-white dark:bg-gray-800 p-3 rounded shadow-lg border border-gray-200 dark:border-gray-600 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
+                            <h4 className="font-bold mb-1">{workout.exercise}:</h4>
+                            {workoutExercises[workout.type].find(ex => ex.name === workout.exercise)?.description || 'No description available.'}
+                          </div>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                    Complete workouts to see your history here.
+                  </p>
+                )}
               </div>
             </div>
           </section>
