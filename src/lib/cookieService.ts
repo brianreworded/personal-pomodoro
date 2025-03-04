@@ -54,19 +54,57 @@ export const cookieService = {
   getUserPreferences: (): UserPreferences => {
     try {
       const preferencesJson = Cookies.get(COOKIE_KEYS.USER_PREFERENCES)
-      return preferencesJson 
-        ? JSON.parse(preferencesJson) 
-        : {
-            stretchesDifficulty: 1,
-            yogaDifficulty: 1,
-            calisthenicsDifficulty: 1
-          }
+      const defaultPrefs = {
+        stretchesDifficulty: 1,
+        yogaDifficulty: 1,
+        calisthenicsDifficulty: 1,
+        enabledWorkoutTypes: {
+          stretches: true,
+          yoga: true,
+          calisthenics: true
+        },
+        targetBodyParts: {
+          upper: true,
+          core: true,
+          lower: true,
+          full: true
+        }
+      };
+      
+      if (!preferencesJson) {
+        return defaultPrefs;
+      }
+      
+      // Parse the saved preferences
+      const savedPrefs = JSON.parse(preferencesJson);
+      
+      // If the saved preferences are from before the update, add the new fields
+      if (!savedPrefs.enabledWorkoutTypes) {
+        savedPrefs.enabledWorkoutTypes = defaultPrefs.enabledWorkoutTypes;
+      }
+      
+      if (!savedPrefs.targetBodyParts) {
+        savedPrefs.targetBodyParts = defaultPrefs.targetBodyParts;
+      }
+      
+      return savedPrefs;
     } catch (error) {
       console.error('Error parsing user preferences from cookies:', error)
       return {
         stretchesDifficulty: 1,
         yogaDifficulty: 1,
-        calisthenicsDifficulty: 1
+        calisthenicsDifficulty: 1,
+        enabledWorkoutTypes: {
+          stretches: true,
+          yoga: true,
+          calisthenics: true
+        },
+        targetBodyParts: {
+          upper: true,
+          core: true,
+          lower: true,
+          full: true
+        }
       }
     }
   },

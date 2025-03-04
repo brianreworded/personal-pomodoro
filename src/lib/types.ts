@@ -11,7 +11,6 @@ export interface Workout {
   type: 'stretches' | 'yoga' | 'calisthenics'
   exercise: string
   reps: number
-  sets: number
   duration?: number // Duration in seconds (for timed exercises like yoga)
   completed: boolean
   createdAt?: number
@@ -23,6 +22,17 @@ export interface UserPreferences {
   stretchesDifficulty: number
   yogaDifficulty: number
   calisthenicsDifficulty: number
+  enabledWorkoutTypes: {
+    stretches: boolean
+    yoga: boolean
+    calisthenics: boolean
+  }
+  targetBodyParts: {
+    upper: boolean
+    core: boolean
+    lower: boolean
+    full: boolean
+  }
 }
 
 export type ColorTheme = 'blue' | 'teal' | 'purple' | 'amber' | 'rose' | 'emerald'

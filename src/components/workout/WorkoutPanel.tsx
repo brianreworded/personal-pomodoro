@@ -24,7 +24,18 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
   const [userPreferences, setUserPreferences] = useState({
     stretchesDifficulty: 1,
     yogaDifficulty: 1,
-    calisthenicsDifficulty: 1
+    calisthenicsDifficulty: 1,
+    enabledWorkoutTypes: {
+      stretches: true,
+      yoga: true,
+      calisthenics: true
+    },
+    targetBodyParts: {
+      upper: true,
+      core: true,
+      lower: true,
+      full: true
+    }
   })
   const { colorThemeClasses } = useTheme()
   
@@ -54,102 +65,124 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
     // Create multiple exercises for one complete workout session
     const newWorkouts: Workout[] = [];
     
-    // Add one exercise of each type
-    Object.values(WORKOUT_TYPES).forEach(workoutType => {
-      // Get available exercises for the selected type
-      const exercises = workoutExercises[workoutType];
+    // Define the default enabled workout types and body part preferences if not set yet
+    const enabledTypes = userPreferences.enabledWorkoutTypes || {
+      stretches: true,
+      yoga: true,
+      calisthenics: true
+    };
+    
+    const targetBodyParts = userPreferences.targetBodyParts || {
+      upper: true,
+      core: true,
+      lower: true,
+      full: true
+    };
+    
+    // Get all workout types that are enabled
+    const selectedWorkoutTypes = Object.values(WORKOUT_TYPES).filter((type) => {
+      const key = type as keyof typeof enabledTypes;
+      return enabledTypes[key];
+    });
+    
+    // If no workout types are selected, default to all
+    const availableTypes = selectedWorkoutTypes.length > 0 
+      ? selectedWorkoutTypes 
+      : Object.values(WORKOUT_TYPES);
+    
+    // Need to generate 4 workouts, could have repeating workout types
+    const numWorkouts = 4;
+    
+    for (let i = 0; i < numWorkouts; i++) {
+      // Randomly select a workout type
+      const randomIndex = Math.floor(Math.random() * availableTypes.length);
+      const workoutType = availableTypes[randomIndex];
       
-      // Filter exercises based on user's preferred difficulty
-      let difficultyPreference;
-      switch(workoutType) {
-        case WORKOUT_TYPES.STRETCHES:
-          difficultyPreference = userPreferences.stretchesDifficulty;
-          break;
-        case WORKOUT_TYPES.YOGA:
-          difficultyPreference = userPreferences.yogaDifficulty;
-          break;
-        case WORKOUT_TYPES.CALISTHENICS:
-          difficultyPreference = userPreferences.calisthenicsDifficulty;
-          break;
-        default:
-          difficultyPreference = 1;
+      // Get available exercises for the selected type
+      let exercises = workoutExercises[workoutType];
+      
+      // Filter by body part preference
+      const selectedBodyParts = Object.entries(targetBodyParts)
+        .filter(([, enabled]) => enabled)
+        .map(([part]) => part);
+      
+      if (selectedBodyParts.length > 0) {
+        const filteredExercises = exercises.filter((ex) => 
+          ex.bodyPart && selectedBodyParts.includes(ex.bodyPart)
+        );
+        
+        // Only use filtered exercises if we found some, otherwise fallback to all
+        if (filteredExercises.length > 0) {
+          exercises = filteredExercises;
+        }
       }
       
-      // Get exercises that match the user's preferred difficulty (±1)
-      const suitableExercises = exercises.filter(ex => 
+      // Get the appropriate difficulty preference
+      let difficultyPreference = 1;
+      
+      if (workoutType === WORKOUT_TYPES.STRETCHES) {
+        difficultyPreference = userPreferences.stretchesDifficulty;
+      } else if (workoutType === WORKOUT_TYPES.YOGA) {
+        difficultyPreference = userPreferences.yogaDifficulty;
+      } else if (workoutType === WORKOUT_TYPES.CALISTHENICS) {
+        difficultyPreference = userPreferences.calisthenicsDifficulty;
+      }
+      
+      // Filter by difficulty (±1)
+      const suitableExercises = exercises.filter((ex) => 
         Math.abs(ex.difficulty - difficultyPreference) <= 1
       );
       
-      // If no suitable exercises, fall back to all exercises
+      // Use suitable exercises if available, otherwise use all
       const availableExercises = suitableExercises.length > 0 ? suitableExercises : exercises;
       
-      // Select a random exercise
-      const randomExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
+      // Pick a random exercise
+      const randomExIndex = Math.floor(Math.random() * availableExercises.length);
+      const randomExercise = availableExercises[randomExIndex];
       
-      // Determine reps and sets based on difficulty and exercise type
-      let reps, sets, duration;
+      // Set up reps and duration based on type and difficulty
+      let reps = 0;
+      let duration = 0;
       
-      // For yoga and stretches, we'll use duration instead of reps (in seconds)
-      if (workoutType === WORKOUT_TYPES.YOGA || workoutType === WORKOUT_TYPES.STRETCHES) {
-        switch(randomExercise.difficulty) {
-          case 1:
-            duration = workoutType === WORKOUT_TYPES.YOGA ? 60 : 45 // 1 minute for yoga, 45 seconds for stretches
-            sets = 2;
-            break;
-          case 2:
-            duration = workoutType === WORKOUT_TYPES.YOGA ? 45 : 30;
-            sets = 2;
-            break;
-          case 3:
-            duration = 30;
-            sets = workoutType === WORKOUT_TYPES.YOGA ? 3 : 2;
-            break;
-          case 4:
-            duration = 30;
-            sets = 2;
-            break;
-          default:
-            duration = workoutType === WORKOUT_TYPES.YOGA ? 60 : 45;
-            sets = 2;
+      const isTimedExercise = workoutType === WORKOUT_TYPES.YOGA || workoutType === WORKOUT_TYPES.STRETCHES;
+      
+      if (isTimedExercise) {
+        // For yoga and stretches (timed exercises)
+        if (randomExercise.difficulty === 1) {
+          duration = workoutType === WORKOUT_TYPES.YOGA ? 60 : 45;
+        } else if (randomExercise.difficulty === 2) {
+          duration = workoutType === WORKOUT_TYPES.YOGA ? 45 : 30;
+        } else if (randomExercise.difficulty === 3 || randomExercise.difficulty === 4) {
+          duration = 30;
+        } else {
+          duration = workoutType === WORKOUT_TYPES.YOGA ? 60 : 45;
         }
-        reps = 0; // Not applicable for timed exercises
       } else {
-        // For calisthenics
-        switch(randomExercise.difficulty) {
-          case 1:
-            reps = 10;
-            sets = 3;
-            break;
-          case 2:
-            reps = 8;
-            sets = 3;
-            break;
-          case 3:
-            reps = 6;
-            sets = 3;
-            break;
-          case 4:
-            reps = 5;
-            sets = 2;
-            break;
-          default:
-            reps = 10;
-            sets = 3;
+        // For calisthenics (rep-based exercises)
+        if (randomExercise.difficulty === 1) {
+          reps = 15;
+        } else if (randomExercise.difficulty === 2) {
+          reps = 12;
+        } else if (randomExercise.difficulty === 3) {
+          reps = 10;
+        } else if (randomExercise.difficulty === 4) {
+          reps = 8;
+        } else {
+          reps = 15;
         }
-        duration = 0; // Not applicable for non-timed exercises
       }
       
-      // Create the workout and add it to the array
+      // Create and add the workout
       newWorkouts.push({
         type: workoutType as 'stretches' | 'yoga' | 'calisthenics',
         exercise: randomExercise.name,
         reps,
-        sets,
         duration,
         completed: false
       });
-    });
+    }
     
+    // Update state
     updateCurrentWorkouts(newWorkouts);
     setShowFeedback(false);
   }, [userPreferences, updateCurrentWorkouts])
@@ -275,7 +308,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
                   </span>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     ~{(workout.type === 'yoga' || workout.type === 'stretches') ? 
-                      Math.ceil((workout.duration || 0) * workout.sets / 60) : 3} minutes
+                      Math.ceil((workout.duration || 0) / 60) : 2} minutes
                   </span>
                 </div>
                 
@@ -296,7 +329,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
                   {(workout.type === 'yoga' || workout.type === 'stretches') ? (
                     <div>
                       <span className="text-gray-500 dark:text-gray-400">Duration</span>
-                      <p className="text-lg font-semibold">{workout.duration} seconds per set</p>
+                      <p className="text-lg font-semibold">{workout.duration} seconds</p>
                     </div>
                   ) : (
                     <div>
@@ -305,8 +338,10 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-500 dark:text-gray-400">Sets</span>
-                    <p className="text-lg font-semibold">{workout.sets}</p>
+                    <span className="text-gray-500 dark:text-gray-400">Body Part</span>
+                    <p className="text-lg font-semibold capitalize">
+                      {workoutExercises[workout.type].find(ex => ex.name === workout.exercise)?.bodyPart || 'Full Body'}
+                    </p>
                   </div>
                 </div>
                 

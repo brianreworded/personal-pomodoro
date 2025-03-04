@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { FaArrowLeft, FaCheck } from 'react-icons/fa'
 import { useTheme } from '@/components/ui/ThemeProvider'
 import { useAppState } from '@/components/ui/AppProvider'
-import { ColorTheme } from '@/lib/types'
+import { ColorTheme, UserPreferences } from '@/lib/types'
 import { cookieService } from '@/lib/cookieService'
 
 // Import workout exercise data
@@ -29,6 +29,23 @@ export default function SettingsPage() {
   
   const [pomodoroStats, setPomodoroStats] = useState({
     total: 0
+  })
+  
+  const [workoutPreferences, setWorkoutPreferences] = useState<UserPreferences>({
+    stretchesDifficulty: 1,
+    yogaDifficulty: 1,
+    calisthenicsDifficulty: 1,
+    enabledWorkoutTypes: {
+      stretches: true,
+      yoga: true,
+      calisthenics: true
+    },
+    targetBodyParts: {
+      upper: true,
+      core: true,
+      lower: true,
+      full: true
+    }
   })
   
   // Function to update stats from current app state
@@ -63,8 +80,12 @@ export default function SettingsPage() {
       setPomodoroStats({
         total: pomodoroCount
       })
+      
+      // Load workout preferences from cookies
+      const prefs = cookieService.getUserPreferences()
+      setWorkoutPreferences(prefs)
     } catch (error) {
-      console.error('Failed to load pomodoro count', error)
+      console.error('Failed to load stats or preferences', error)
     }
   }, [tasks, workoutHistory])
 
@@ -72,6 +93,16 @@ export default function SettingsPage() {
   useEffect(() => {
     updateStats()
   }, [updateStats])
+  
+  // Load workout preferences on mount and when they might change
+  useEffect(() => {
+    try {
+      const prefs = cookieService.getUserPreferences();
+      setWorkoutPreferences(prefs);
+    } catch (error) {
+      console.error('Failed to load workout preferences', error);
+    }
+  }, [])
   
   const colorOptions: { value: ColorTheme; label: string; bgClass: string }[] = [
     { value: 'blue', label: 'Blue', bgClass: 'bg-blue-500' },
@@ -371,6 +402,220 @@ export default function SettingsPage() {
                   {settings.baseWorkoutDifficulty === 'hard' && <FaCheck className={colorThemeClasses.accent} />}
                   <span>Hard</span>
                 </button>
+              </div>
+            </div>
+          </section>
+          
+          <section className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700">
+            <h2 className={`text-xl font-semibold mb-5 ${colorThemeClasses.primary}`}>Workout Settings</h2>
+            
+            <div className="mb-6">
+              <h3 className="text-sm font-medium mb-3">Workout Types</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Select which workout types to include:</p>
+              
+              <div className="grid grid-cols-3 gap-3">
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.enabledWorkoutTypes?.stretches ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.enabledWorkoutTypes?.stretches} 
+                    onChange={() => {
+                      // Enable/disable stretches
+                      const enabledTypes = {...(workoutPreferences.enabledWorkoutTypes || { stretches: true, yoga: true, calisthenics: true })};
+                      
+                      // Toggle the current setting
+                      enabledTypes.stretches = !enabledTypes.stretches;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        enabledWorkoutTypes: enabledTypes
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Stretches</span>
+                </label>
+                
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.enabledWorkoutTypes?.yoga ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.enabledWorkoutTypes?.yoga}
+                    onChange={() => {
+                      // Enable/disable yoga
+                      const enabledTypes = {...(workoutPreferences.enabledWorkoutTypes || { stretches: true, yoga: true, calisthenics: true })};
+                      
+                      // Toggle the current setting
+                      enabledTypes.yoga = !enabledTypes.yoga;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        enabledWorkoutTypes: enabledTypes
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Yoga</span>
+                </label>
+                
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.enabledWorkoutTypes?.calisthenics ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.enabledWorkoutTypes?.calisthenics}
+                    onChange={() => {
+                      // Enable/disable calisthenics
+                      const enabledTypes = {...(workoutPreferences.enabledWorkoutTypes || { stretches: true, yoga: true, calisthenics: true })};
+                      
+                      // Toggle the current setting
+                      enabledTypes.calisthenics = !enabledTypes.calisthenics;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        enabledWorkoutTypes: enabledTypes
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Calisthenics</span>
+                </label>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-3">Target Body Parts</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Select which body parts to focus on:</p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.targetBodyParts?.upper ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.targetBodyParts?.upper}
+                    onChange={() => {
+                      // Enable/disable upper body
+                      const targetParts = {...(workoutPreferences.targetBodyParts || { upper: true, core: true, lower: true, full: true })};
+                      
+                      // Toggle the current setting
+                      targetParts.upper = !targetParts.upper;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        targetBodyParts: targetParts
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Upper Body</span>
+                </label>
+                
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.targetBodyParts?.core ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.targetBodyParts?.core}
+                    onChange={() => {
+                      // Enable/disable core
+                      const targetParts = {...(workoutPreferences.targetBodyParts || { upper: true, core: true, lower: true, full: true })};
+                      
+                      // Toggle the current setting
+                      targetParts.core = !targetParts.core;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        targetBodyParts: targetParts
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Core</span>
+                </label>
+                
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.targetBodyParts?.lower ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.targetBodyParts?.lower}
+                    onChange={() => {
+                      // Enable/disable lower body
+                      const targetParts = {...(workoutPreferences.targetBodyParts || { upper: true, core: true, lower: true, full: true })};
+                      
+                      // Toggle the current setting
+                      targetParts.lower = !targetParts.lower;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        targetBodyParts: targetParts
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Lower Body</span>
+                </label>
+                
+                <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
+                    workoutPreferences.targetBodyParts?.full ? 
+                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    'border-gray-200 dark:border-gray-700'
+                  }`}>
+                  <input 
+                    type="checkbox" 
+                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    checked={!!workoutPreferences.targetBodyParts?.full}
+                    onChange={() => {
+                      // Enable/disable full body
+                      const targetParts = {...(workoutPreferences.targetBodyParts || { upper: true, core: true, lower: true, full: true })};
+                      
+                      // Toggle the current setting
+                      targetParts.full = !targetParts.full;
+                      
+                      // Update preferences
+                      const newPrefs = {
+                        ...workoutPreferences,
+                        targetBodyParts: targetParts
+                      };
+                      cookieService.saveUserPreferences(newPrefs);
+                      setWorkoutPreferences(newPrefs);
+                    }}
+                  />
+                  <span>Full Body</span>
+                </label>
               </div>
             </div>
           </section>
