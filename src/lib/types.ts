@@ -35,7 +35,7 @@ export interface UserPreferences {
   }
 }
 
-export type ColorTheme = 'blue' | 'teal' | 'purple' | 'amber' | 'rose' | 'emerald'
+export type ColorTheme = 'blue' | 'teal' | 'purple' | 'amber' | 'rose' | 'emerald' | 'indigo' | 'lime' | 'cyan' | 'pink' | 'orange' | 'green'
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system'

@@ -20,7 +20,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
   
   // We'll handle the sound later when we have a proper sound file
   const [playAlarm] = useSound('/sounds/alarm.mp3')
-  
+  const [playStart] = useSound('/sounds/short gong.mp3')
   // Initialize progress
   useEffect(() => {
     setProgress((timeLeft / duration) * 100)
@@ -46,6 +46,9 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
   
   const toggleTimer = () => {
     updateTimerState({ isActive: !isActive })
+    if (!isActive){
+      playStart();
+    }
   }
   
   const resetTimer = () => {

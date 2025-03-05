@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'
 import { FaEllipsisH, FaEye, FaEyeSlash, FaTrash, FaPlus } from 'react-icons/fa'
 import Confetti from 'react-confetti'
+import useSound from 'use-sound'
 import { useTheme } from '@/components/ui/ThemeProvider'
 import { useAppState } from '@/components/ui/AppProvider'
 import { Task } from '@/lib/types'
@@ -13,6 +14,7 @@ const TaskPanel = () => {
   const [showCompleted, setShowCompleted] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [playCelebration] = useSound('/sounds/winner.mp3')
   const { colorThemeClasses, settings } = useTheme()
   const { tasks, updateTasks } = useAppState()
   
@@ -37,6 +39,7 @@ const TaskPanel = () => {
         if (newCompleted) {
           // Task was just completed, show confetti
           setShowConfetti(true)
+          playCelebration();
           setTimeout(() => setShowConfetti(false), 3000)
           return { 
             ...task, 

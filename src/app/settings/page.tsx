@@ -111,6 +111,12 @@ export default function SettingsPage() {
     { value: 'amber', label: 'Amber', bgClass: 'bg-amber-500' },
     { value: 'rose', label: 'Rose', bgClass: 'bg-rose-500' },
     { value: 'emerald', label: 'Emerald', bgClass: 'bg-emerald-500' },
+    { value: 'indigo', label: 'Indigo', bgClass: 'bg-indigo-500' },
+    { value: 'lime', label: 'Lime', bgClass: 'bg-lime-500' },
+    { value: 'cyan', label: 'Cyan', bgClass: 'bg-cyan-500' },
+    { value: 'pink', label: 'Pink', bgClass: 'bg-pink-500' },
+    { value: 'orange', label: 'Orange', bgClass: 'bg-orange-500' },
+    { value: 'green', label: 'Green', bgClass: 'bg-green-500' },
   ]
   
   return (
@@ -290,7 +296,7 @@ export default function SettingsPage() {
             
             <div className="mb-8">
               <h3 className="text-sm font-medium mb-3">Color Theme</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {colorOptions.map((color) => (
                   <button
                     key={color.value}
@@ -302,7 +308,7 @@ export default function SettingsPage() {
                     }`}
                   >
                     <div className={`w-6 h-6 rounded-full ${color.bgClass} mb-1`}></div>
-                    <span>{color.label}</span>
+                    <span className="text-sm">{color.label}</span>
                     {settings.colorTheme === color.value && (
                       <FaCheck className={`mt-1 ${colorThemeClasses.accent}`} />
                     )}
@@ -416,12 +422,12 @@ export default function SettingsPage() {
               <div className="grid grid-cols-3 gap-3">
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.enabledWorkoutTypes?.stretches ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.enabledWorkoutTypes?.stretches} 
                     onChange={() => {
                       // Enable/disable stretches
@@ -444,12 +450,12 @@ export default function SettingsPage() {
                 
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.enabledWorkoutTypes?.yoga ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.enabledWorkoutTypes?.yoga}
                     onChange={() => {
                       // Enable/disable yoga
@@ -472,12 +478,12 @@ export default function SettingsPage() {
                 
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.enabledWorkoutTypes?.calisthenics ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.enabledWorkoutTypes?.calisthenics}
                     onChange={() => {
                       // Enable/disable calisthenics
@@ -507,12 +513,12 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.targetBodyParts?.upper ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.targetBodyParts?.upper}
                     onChange={() => {
                       // Enable/disable upper body
@@ -535,12 +541,12 @@ export default function SettingsPage() {
                 
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.targetBodyParts?.core ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.targetBodyParts?.core}
                     onChange={() => {
                       // Enable/disable core
@@ -563,12 +569,12 @@ export default function SettingsPage() {
                 
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.targetBodyParts?.lower ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.targetBodyParts?.lower}
                     onChange={() => {
                       // Enable/disable lower body
@@ -591,12 +597,12 @@ export default function SettingsPage() {
                 
                 <label className={`flex items-center cursor-pointer p-3 border rounded-lg ${
                     workoutPreferences.targetBodyParts?.full ? 
-                    `border-${settings.colorTheme}-500 dark:border-${settings.colorTheme}-700 bg-${settings.colorTheme}-50 dark:bg-${settings.colorTheme}-900/20` : 
+                    colorThemeClasses.active : 
                     'border-gray-200 dark:border-gray-700'
                   }`}>
                   <input 
                     type="checkbox" 
-                    className={`h-5 w-5 mr-2 text-${settings.colorTheme}-500 rounded focus:ring-${settings.colorTheme}-500`}
+                    className="h-5 w-5 mr-2 rounded"
                     checked={!!workoutPreferences.targetBodyParts?.full}
                     onChange={() => {
                       // Enable/disable full body

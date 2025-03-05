@@ -6,7 +6,7 @@ import { useTheme } from '@/components/ui/ThemeProvider'
 import { cookieService } from '@/lib/cookieService'
 import { workoutExercises, WORKOUT_TYPES } from '@/lib/workoutData'
 import { useAppState } from '@/components/ui/AppProvider'
-
+import useSound from 'use-sound'
 // Import the Workout type from types file
 import { Workout } from '@/lib/types'
 
@@ -18,7 +18,7 @@ interface WorkoutPanelProps {
 const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete }) => {
   const { appState, updateCurrentWorkouts, setWorkoutActive, workoutHistory, updateWorkoutHistory } = useAppState()
   const { currentWorkouts, isWorkoutActive } = appState
-  
+  const [ playComplete ] = useSound('/sounds/gong-mallet.mp3')
   const [showConfetti, setShowConfetti] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [userPreferences, setUserPreferences] = useState({
@@ -217,6 +217,7 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
     // Show confetti if all workouts are completed
     if (updatedWorkouts.every((w: Workout) => w.completed)) {
       setShowConfetti(true);
+      playComplete();
       setTimeout(() => setShowConfetti(false), 3000);
       // Show feedback dialog
       setShowFeedback(true);

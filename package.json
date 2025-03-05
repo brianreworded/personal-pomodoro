@@ -1,7 +1,7 @@
 {
   "name": "personal-pomodoro",
   "version": "1.0.0",
-  "description": "NextJS/ShadcnUI Pomodoro Fitness App that combines the Pomodoro technique with active workout breaks",
+  "description": "NextJS/ShadcnUI Pomodoro Wellness App that combines the Pomodoro technique with active workout breaks",
   "private": true,
   "scripts": {
     "dev": "next dev",
