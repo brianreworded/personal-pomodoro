@@ -197,7 +197,6 @@ export default function SettingsPage() {
                     {tasks
                       .filter(task => task.completed)
                       .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))
-                      .slice(0, 5)
                       .map((task, index) => (
                         <li key={index} className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
                           <span className={`w-2 h-2 rounded-full mr-2 ${colorThemeClasses.progress}`}></span>
@@ -223,8 +222,7 @@ export default function SettingsPage() {
                 {workoutStats.total > 0 ? (
                   <ul className="space-y-1">
                     {workoutHistory
-                      .slice(-5)
-                      .reverse()
+                      .sort((a, b) => (b?.completedAt || 0) - (a?.completedAt || 0))
                       .map((workout, index) => (
                         <li key={index} className="text-sm text-gray-600 dark:text-gray-300 flex items-center group relative">
                           <span className={`w-2 h-2 rounded-full mr-2 ${
