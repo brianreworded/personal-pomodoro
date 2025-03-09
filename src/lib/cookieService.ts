@@ -6,7 +6,8 @@ const COOKIE_KEYS = {
   WORKOUT_HISTORY: 'workoutHistory',
   USER_PREFERENCES: 'userPreferences',
   APP_SETTINGS: 'appSettings',
-  POMODORO_COUNT: 'pomodoroCount'
+  POMODORO_COUNT: 'pomodoroCount',
+  HAS_SEEN_ONBOARDING: 'hasSeenOnboarding'
 }
 
 const COOKIE_EXPIRY = 365 // days
@@ -167,6 +168,24 @@ export const cookieService = {
       Cookies.set(COOKIE_KEYS.POMODORO_COUNT, (current + 1).toString(), { expires: COOKIE_EXPIRY })
     } catch (error) {
       console.error('Error incrementing pomodoro count:', error)
+    }
+  },
+  
+  // Onboarding
+  hasSeenOnboarding: (): boolean => {
+    try {
+      return Cookies.get(COOKIE_KEYS.HAS_SEEN_ONBOARDING) === 'true'
+    } catch (error) {
+      console.error('Error checking onboarding status:', error)
+      return false
+    }
+  },
+  
+  setOnboardingComplete: (): void => {
+    try {
+      Cookies.set(COOKIE_KEYS.HAS_SEEN_ONBOARDING, 'true', { expires: COOKIE_EXPIRY })
+    } catch (error) {
+      console.error('Error setting onboarding status:', error)
     }
   }
 }

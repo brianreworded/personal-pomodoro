@@ -14,6 +14,9 @@ type AppContextType = {
   updateTasks: (tasks: Task[]) => void
   workoutHistory: Workout[]
   updateWorkoutHistory: (history: Workout[]) => void
+  showOnboarding: boolean
+  setShowOnboarding: (show: boolean) => void
+  completeOnboarding: () => void
 }
 
 const initialTimerState: TimerState = {
@@ -35,6 +38,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [appState, setAppState] = useState<AppState>(initialAppState)
   const [tasks, setTasks] = useState<Task[]>([])
   const [workoutHistory, setWorkoutHistory] = useState<Workout[]>([])
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false)
 
   // Load all data on initial render
   useEffect(() => {
@@ -64,6 +68,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setWorkoutHistory(savedWorkoutHistory)
       } catch (error) {
         console.error('Failed to load workout history:', error)
+      }
+      
+      // Check if user has seen onboarding
+      try {
+        const hasSeenOnboarding = cookieService.hasSeenOnboarding()
+        setShowOnboarding(!hasSeenOnboarding)
+      } catch (error) {
+        console.error('Failed to check onboarding status:', error)
+        setShowOnboarding(true) // Show onboarding by default if there's an error
       }
     }
   }, [])
@@ -188,6 +201,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     // Save to cookies immediately
     cookieService.saveWorkoutHistory(newHistory)
   }
+  
+  const completeOnboarding = () => {
+    setShowOnboarding(false)
+    cookieService.setOnboardingComplete()
+  }
 
   return (
     <AppContext.Provider 
@@ -200,7 +218,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         tasks,
         updateTasks,
         workoutHistory,
-        updateWorkoutHistory
+        updateWorkoutHistory,
+        showOnboarding,
+        setShowOnboarding,
+        completeOnboarding
       }}
     >
       {children}

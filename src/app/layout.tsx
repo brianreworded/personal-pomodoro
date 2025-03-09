@@ -5,6 +5,7 @@ import Navbar from '@/components/ui/Navbar'
 import { ThemeProvider } from '@/components/ui/ThemeProvider'
 import { AppProvider } from '@/components/ui/AppProvider'
 import DynamicTitle from '@/components/ui/DynamicTitle'
+import { OnboardingWrapper } from '@/components/ui/OnboardingWrapper'
 import Head from 'next/head'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -29,7 +30,10 @@ export default function RootLayout({
           <AppProvider>
             <DynamicTitle />
             <Navbar />
-            {children}
+            {/* OnboardingWrapper provides the onboarding modal for first-time visitors */}
+            <OnboardingWrapper>
+              {children}
+            </OnboardingWrapper>
           </AppProvider>
         </ThemeProvider>
       </body>
