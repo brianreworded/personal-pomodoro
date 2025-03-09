@@ -189,10 +189,10 @@ const WorkoutPanel: React.FC<WorkoutPanelProps> = ({ isActive, onWorkoutComplete
   
   // Generate a new workout when the timer completes
   useEffect(() => {
-    if (isActive && (currentWorkouts.length === 0 || currentWorkouts.every((w: Workout) => w.completed))) {
+    if (isActive && currentWorkouts.length === 0 && !showFeedback) {
       generateWorkout()
     }
-  }, [isActive, currentWorkouts, generateWorkout])
+  }, [isActive, currentWorkouts, generateWorkout, showFeedback])
   
   const completeWorkout = (index: number) => {
     if (currentWorkouts.length === 0) return

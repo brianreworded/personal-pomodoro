@@ -16,6 +16,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
   
   const [progress, setProgress] = useState(100)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const endTimeRef = useRef<number | null>(null)
   const { colorThemeClasses } = useTheme()
   
   // We'll handle the sound later when we have a proper sound file
@@ -28,25 +29,46 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ onTimerComplete }) => {
   
   useEffect(() => {
     if (isActive && timeLeft > 0) {
+      // Set end time when timer starts or resumes
+      if (endTimeRef.current === null) {
+        endTimeRef.current = Date.now() + timeLeft * 1000;
+      }
+      
       timerRef.current = setTimeout(() => {
-        updateTimerState({ timeLeft: timeLeft - 1 })
-        setProgress((timeLeft - 1) / duration * 100)
-      }, 1000)
+        const now = Date.now();
+        const remaining = Math.max(0, Math.ceil((endTimeRef.current! - now) / 1000));
+        
+        if (remaining <= 0) {
+          // Timer complete
+          updateTimerState({ timeLeft: 0 });
+          setProgress(0);
+          endTimeRef.current = null;
+        } else {
+          // Update with actual remaining time
+          updateTimerState({ timeLeft: remaining });
+          setProgress(remaining / duration * 100);
+        }
+      }, 100); // Update more frequently for smoother countdown
     } else if (isActive && timeLeft === 0) {
-      playAlarm()
-      setTimerCompleted(true)
-      onTimerComplete()
-      updateTimerState({ isActive: false })
+      playAlarm();
+      setTimerCompleted(true);
+      onTimerComplete();
+      updateTimerState({ isActive: false });
+      endTimeRef.current = null;
+    } else if (!isActive) {
+      // Pause timer, clear end time
+      endTimeRef.current = null;
     }
     
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [isActive, timeLeft, duration, onTimerComplete, playAlarm, updateTimerState, setTimerCompleted])
   
   const toggleTimer = () => {
-    updateTimerState({ isActive: !isActive })
-    if (!isActive){
+    const newIsActive = !isActive;
+    updateTimerState({ isActive: newIsActive });
+    if (newIsActive) {
       playStart();
     }
   }
