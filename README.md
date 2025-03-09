@@ -51,7 +51,8 @@ A productivity app that combines the Pomodoro technique with active workout brea
 - Key Concept: Workouts function as the active breaks in the Pomodoro cycle
 - Automatically generates a 3-minute workout routine when a work timer completes
 - Manual trigger option to generate workout without completing timer
-- Each workout includes:
+  
+Each workout includes:
 
 - Exercise type (categorized as stretches, yoga poses, or calisthenics)
 - Number of repetitions
@@ -71,28 +72,29 @@ A productivity app that combines the Pomodoro technique with active workout brea
 Same completion mechanics as tasks (checkbox, strikethrough, fade to grey, confetti)
 After completion, popup asking for difficulty feedback:
 
-"Too Easy" - increases difficulty for future similar exercises
-"Just Right" - maintains current difficulty level
-"Too Hard" - decreases difficulty for future similar exercises
+- "Too Easy" - increases difficulty for future similar exercises
+- "Just Right" - maintains current difficulty level
+- "Too Hard" - decreases difficulty for future similar exercises
 
 
 
 ### Pomodoro Cycle Flow
 
-User works on tasks in Panel 1 during the Pomodoro timer (25 or 50 minutes)
-When timer completes, sound notification plays
-System automatically generates a 3-minute workout in Panel 2
-User completes the workout as their active break
-After completing the workout, user can start the next Pomodoro work session
+- User works on tasks in Panel 1 during the Pomodoro timer (25 or 50 minutes)
+- When timer completes, sound notification plays
+- System automatically generates a 3-minute workout in Panel 2
+- User completes the workout as their active break
+- After completing the workout, user can start the next Pomodoro work session
+
 This cycle continues: Work → Active Break → Work → Active Break
 
-Settings Page
-Statistics Dashboard
+- Settings Page
+- Statistics Dashboard
 
-Work tasks completed (total and daily)
-Workout breaks completed (total and by category)
-Pomodoro work sessions completed
-Visual graphs showing completion trends
+- Work tasks completed (total and daily)
+- Workout breaks completed (total and by category)
+- Pomodoro work sessions completed
+- Visual graphs showing completion trends
 
 ### History Logs
 
